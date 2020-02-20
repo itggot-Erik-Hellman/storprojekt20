@@ -34,3 +34,7 @@ end
 get ('/main_page') do
     slim(:main_page)
 end
+
+post ('/logo') do
+    redirect('/main_page')
+end
