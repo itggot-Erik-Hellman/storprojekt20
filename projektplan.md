@@ -7,4 +7,5 @@ Hemsidan ska ha en inloggningsfuntion samt en regristreringsfuntion. Man ska sed
 
 ## 3. Databas med ER-diagram (Bild)
 Flowchart.png
+![Flowchart](Flowchart.png)
 ## 4. Arkitektur (Beskriv filer och mappar - vad gör/inehåller de?)
