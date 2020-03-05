@@ -33,8 +33,17 @@ end
 
 get ('/main_page') do
     slim(:main_page)
+    db.execute("SELECT category_name FROM category")
 end
 
 get ('/logo') do
+    redirect('/main_page')
+end
+
+post ('/new') do
+    id = params[:id]
+    category_name = params[:category_name]
+    db = SQLite3::Database.new("db/workflow.db") 
+    create = db.execute("INSERT INTO category (id, category_name) VALUES (?,?)",id,category_name)
     redirect('/main_page')
 end
