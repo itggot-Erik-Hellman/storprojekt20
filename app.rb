@@ -32,8 +32,9 @@ post ('/users/login') do
 end
 
 get ('/main_page') do
-    slim(:main_page)
-    db.execute("SELECT category_name FROM category")
+    db.results_as_hash = true
+    destination = db.execute("SELECT category_name FROM category")
+    slim(:main_page, locals:{destination:destination})
 end
 
 get ('/logo') do
