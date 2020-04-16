@@ -33,7 +33,7 @@ end
 
 get ('/main_page') do
     db.results_as_hash = true
-    destination = db.execute("SELECT category_name FROM category")
+    destination = db.execute("SELECT * FROM category")
     slim(:main_page, locals:{destination:destination})
 end
 
@@ -46,5 +46,20 @@ post ('/new') do
     category_name = params[:category_name]
     db = SQLite3::Database.new("db/workflow.db") 
     create = db.execute("INSERT INTO category (id, category_name) VALUES (?,?)",id,category_name)
+    redirect('/main_page')
+end
+
+post ('/delete/:id') do
+    id = params[:id]
+    db = SQLite3::Database.new("db/workflow.db") 
+    db.execute("DELETE FROM category WHERE id=?",id.to_i)
+    redirect('/main_page')
+end
+
+post ('/update/:id') do
+    id = params[:id]
+    category_name = params[:category_name]
+    db = SQLite3::Database.new("db/workflow.db")
+    db.execute("UPDATE category SET category_name=? WHERE id=?", category_name,id.to_i)
     redirect('/main_page')
 end

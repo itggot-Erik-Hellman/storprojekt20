@@ -11,8 +11,13 @@ form action="/profile" method="post"
 
 form action="/new" method="post"
     input type="text" name="category_name" placeholder="Create your travel"
-    button type="submit" create
+    button type="submit" Create
 
 h1 = destination
 -destination.each do |item|
     p = item['category_name']
+    form action="/delete/#{item["id"]}" method="post"
+        input type="submit" value="delete" 
+    form action="/update/#{item["id"]}" method="post"
+        input type="text" name="category_name" placeholder="update"
+        button type="submit" Update
