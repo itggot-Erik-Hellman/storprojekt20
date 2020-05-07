@@ -13,7 +13,6 @@ form action="/new" method="post"
     input type="text" name="category_name" placeholder="Create your travel"
     button type="submit" Create
 
-h1 = destination
 -destination.each do |item|
     p = item['category_name']
     form action="/delete/#{item["id"]}" method="post"
