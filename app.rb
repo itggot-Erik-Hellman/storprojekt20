@@ -8,11 +8,15 @@ enable :sessions
 db = SQLite3::Database.new("db/workflow.db")
 db.results_as_hash = true
 
-get ('/') do #Gör så att informationen som visas i routen '/' är från slim filen "start.slim"
-    slim(:start)
+get ('/error') do
+    session[:error]
 end
 
-post ('/users/start/create') do #Routen '/users/create' lägger till ett email samt ett lösenord som crypteras av bcrypt. Http-metoden är post eftersom man ändrar på något, i detta fall databasen där man lägger till email och password
+get ('/') do #Gör så att informationen som visas i routen '/' är från slim filen "index.slim"
+    slim(:index)
+end
+
+post ('/users') do #Routen '/users' lägger till ett email samt ett lösenord som crypteras av bcrypt. Http-metoden är post eftersom man ändrar på något, i detta fall databasen där man lägger till email och password
     email = params[:email]
     password = params[:password]
     password_digest = BCrypt::Password.create(password) #crypterar det lösenord användaren skrev in i hemsidan
@@ -20,14 +24,16 @@ post ('/users/start/create') do #Routen '/users/create' lägger till ett email s
     redirect('/') #dirigerar om användaren tillbaka till startsidan efter att den har gjort sitt konto
 end
 
-post ('/users/start/login') do #Routen '/users/login' Kollar om det användaren har skrivit in i email och lösenord stämmer översäns med det som finns i databasen "authentication". Om det gör det kommer användaren in till hemsidan: '/main_page' om inte så redigeras han tillbaka till startsidan
+post ('/login') do #Routen '/login' Kollar om det användaren har skrivit in i email och lösenord stämmer översäns med det som finns i databasen "authentication". Om det gör det kommer användaren in till hemsidan: '/main_page' om inte så redigeras han tillbaka till startsidan
+    db.results_as_hash = true
     result = db.execute("SELECT id, password_digest FROM users WHERE email=?", params[:email])
 
     if(BCrypt::Password.new(result.first["password_digest"]) == params[:password])
         session[:user_id] = result.first["id"]
         redirect('/main_page')
     else    
-        redirect('/')
+        session[:error] = "Wrong email or password"
+        redirect('/error')
     end
 end
 
@@ -52,8 +58,14 @@ end
 post ('/delete/:id') do #Tar bort en hel rad i tabellen:category. Använder mig även av en dynamisk route för att inte behöve skriva samma kod för varje rad i category
     id = params[:id]
     db = SQLite3::Database.new("db/workflow.db") 
+    result = db.execute('SELECT rank FROM users WHERE id=?', session[:user_id])[0][0].to_i #kollar vilken rank kontot har och beroende på om den är admin (rank:1) eller inte så kan man deleta eller så får man ett error medelande
+    if result == 1
     db.execute("DELETE FROM category WHERE id=?",id.to_i) #tar bort från tabellen category beroende på vilket id man tillkallar
     redirect('/main_page')
+    else
+        session[:error] = "ERROR NO ADMIN 101"
+        redirect('/error')
+    end
 end
 
 post ('/update/:id') do #updaterar category_name i tabellen category
@@ -62,4 +74,16 @@ post ('/update/:id') do #updaterar category_name i tabellen category
     db = SQLite3::Database.new("db/workflow.db")
     db.execute("UPDATE category SET category_name=? WHERE id=?", category_name,id.to_i) #updaterar informationen i category_name beroende på vad användaren har skrivit (kan ändra Tyskland till tex Finland eller vad som helst)
     redirect('/main_page')
+end
+
+get ('/profile') do
+    slim(:profile)
+end
+
+post ('/name/:id') do
+    id = params[:id]
+    email = params[:email]
+    db = SQLite3::Database.new("db/workflow.db")
+    db.execute("UPDATE users SET email=? WHERE id=?", email,id.to_i)
+    redirect('/profile')
 end
